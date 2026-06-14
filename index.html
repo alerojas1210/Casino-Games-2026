@@ -114,7 +114,7 @@ body {
 .stat-value { font-size: 1.2rem; font-weight: 700; color: var(--p700); font-family: 'Aeonik', 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.5px; }
 
 /* ── MAIN ── */
-.main { max-width: 1400px; margin: 0 auto; padding: 28px 24px 0; }
+.main { max-width: 100%; margin: 0; padding: 28px 32px 0; }
 
 /* ── CONTROLS ── */
 .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
@@ -363,6 +363,12 @@ body.dark tbody tr:hover  { background: #1A1428; }
     <div class="sel-wrap">
       <select id="categoryFilter"><option value="">All Categories</option></select>
     </div>
+    <div class="sel-wrap">
+      <select id="featureFilter"><option value="">All Features</option></select>
+    </div>
+    <div class="sel-wrap">
+      <select id="themeFilter"><option value="">All Themes</option></select>
+    </div>
     <div class="results-count" id="resultsCount"></div>
   </div>
 
@@ -426,12 +432,32 @@ let renderTimer = null;
 
 // Populate filters
 (function() {
-  const casinos = [...new Set(DATA.map(r=>r[0]))].sort();
-  const cats    = [...new Set(DATA.map(r=>r[1]))].sort();
-  const cSel = document.getElementById('casinoFilter');
-  const catSel = document.getElementById('categoryFilter');
-  casinos.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; cSel.appendChild(o); });
-  cats.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); });
+  const casinos  = [...new Set(DATA.map(r=>r[0]))].sort();
+  const cats     = [...new Set(DATA.map(r=>r[1]))].sort();
+
+  // Features: split by comma, trim, dedupe
+  const featSet = new Set();
+  DATA.forEach(r => {
+    if (r[6] && r[6] !== 'N/A') {
+      r[6].split(',').forEach(f => { const t = f.trim(); if (t) featSet.add(t); });
+    }
+  });
+  const features = [...featSet].sort();
+
+  // Themes: dedupe
+  const themeSet = new Set();
+  DATA.forEach(r => { if (r[7] && r[7].trim()) themeSet.add(r[7].trim()); });
+  const themes = [...themeSet].sort();
+
+  const cSel    = document.getElementById('casinoFilter');
+  const catSel  = document.getElementById('categoryFilter');
+  const featSel = document.getElementById('featureFilter');
+  const themSel = document.getElementById('themeFilter');
+
+  casinos.forEach(c  => { const o=document.createElement('option'); o.value=c; o.textContent=c; cSel.appendChild(o); });
+  cats.forEach(c     => { const o=document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); });
+  features.forEach(f => { const o=document.createElement('option'); o.value=f; o.textContent=f; featSel.appendChild(o); });
+  themes.forEach(t   => { const o=document.createElement('option'); o.value=t; o.textContent=t; themSel.appendChild(o); });
 })();
 
 function parseBet(s) { return parseFloat((s||'').replace(/[$,]/g,''))||0; }
@@ -448,9 +474,13 @@ function applyFilters(sourceEl) {
   const q      = document.getElementById('searchInput').value.toLowerCase().trim();
   const casino = document.getElementById('casinoFilter').value;
   const cat    = document.getElementById('categoryFilter').value;
+  const feat   = document.getElementById('featureFilter').value;
+  const theme  = document.getElementById('themeFilter').value;
   filtered = DATA.filter(r => {
     if (casino && r[0]!==casino) return false;
     if (cat    && r[1]!==cat)    return false;
+    if (feat   && !(r[6]||'').split(',').map(f=>f.trim()).includes(feat)) return false;
+    if (theme  && (r[7]||'').trim()!==theme) return false;
     if (q) { const h=(r[2]+' '+r[6]+' '+r[7]+' '+r[1]+' '+r[0]).toLowerCase(); if (!h.includes(q)) return false; }
     return true;
   });
@@ -552,6 +582,8 @@ document.querySelectorAll('thead th[data-col]').forEach(th => {
 document.getElementById('searchInput').addEventListener('input', function() { applyFilters(this); });
 document.getElementById('casinoFilter').addEventListener('change', function() { applyFilters(this); });
 document.getElementById('categoryFilter').addEventListener('change', function() { applyFilters(this); });
+document.getElementById('featureFilter').addEventListener('change', function() { applyFilters(this); });
+document.getElementById('themeFilter').addEventListener('change', function() { applyFilters(this); });
 
 applyFilters();
 </script>
