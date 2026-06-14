@@ -77,12 +77,12 @@ body {
   font-family: 'Aeonik', 'Plus Jakarta Sans', sans-serif;
   font-size: clamp(2.6rem, 7vw, 5rem);
   font-weight: 700;
-  color: var(--white);
+  color: #FFFFFF;
   line-height: 1.0;
   position: relative;
   letter-spacing: -1.5px;
 }
-.hero h1 em { font-style: normal; color: var(--white); -webkit-text-fill-color: var(--white); background: none; animation: none; }
+.hero h1 em { font-style: normal; color: #FFFFFF; -webkit-text-fill-color: #FFFFFF; background: none; animation: none; }
 .hero-sub {
   color: rgba(255,255,255,.5);
   font-size: 0.9rem;
@@ -317,6 +317,19 @@ body.dark {
 }
 body.dark .stats-strip    { background: #16161F; }
 body.dark .dark-toggle    { background: #1A1A26; }
+body.dark td              { color: var(--text2); }
+body.dark td.game-name    { color: var(--text); }
+body.dark .bet-min        { color: var(--text); }
+body.dark .bet-max        { color: var(--text); }
+body.dark .paylines       { color: var(--text); }
+body.dark .feat           { color: var(--text); }
+body.dark .theme-cell     { color: var(--text); }
+body.dark .stat-label     { color: var(--text3); }
+body.dark .stat-value     { color: #C084FC; }
+body.dark .stat-item      { border-color: var(--border); }
+body.dark .hero h1  { color: var(--white); -webkit-text-fill-color: var(--white); }
+body.dark .hero-eyebrow { color: rgba(255,255,255,.55); }
+body.dark .hero-sub     { color: rgba(255,255,255,.45); }
 body.dark .b-cashback     { background: #0D2010; color: #6EE89A; border-color: #1A4020; }
 body.dark .b-classic      { background: var(--p100); color: #C084FC; border-color: var(--p200); }
 body.dark .b-crown        { background: #2A1508; color: #FB923C; border-color: #4A2510; }
