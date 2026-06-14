@@ -557,13 +557,16 @@ body.dark .match-tag   { background: var(--p200); color: #C084FC; }
   position: fixed; inset: 0; z-index: 300;
   background: rgba(20,0,50,.6); backdrop-filter: blur(4px);
   display: flex; align-items: center; justify-content: center;
+  padding: 20px;
   opacity: 0; pointer-events: none; transition: opacity .25s;
+  overflow-y: auto;
 }
 .quiz-overlay.open { opacity: 1; pointer-events: auto; }
 .quiz-modal {
   background: var(--white); border-radius: 20px;
   width: min(520px, 94vw);
-  max-height: 90vh;
+  max-height: 88vh;
+  min-height: 420px;
   display: flex; flex-direction: column;
   box-shadow: 0 24px 80px rgba(30,0,69,.35);
   transform: scale(.94) translateY(16px);
@@ -590,7 +593,7 @@ body.dark .match-tag   { background: var(--p200); color: #C084FC; }
 }
 .quiz-progress-dot.done { background: #C084FC; }
 .quiz-progress-dot.active { background: #FFFFFF; }
-.quiz-body { padding: 24px 28px 28px; overflow-y: auto; flex: 1; }
+.quiz-body { padding: 20px 28px 24px; overflow-y: auto; flex: 1; min-height: 0; }
 .quiz-question { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 16px; line-height: 1.4; }
 .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
 .quiz-option {
@@ -1190,17 +1193,17 @@ let simSelectedGame = null;
 function renderSimilarTab() {
   const body = document.getElementById('quizBody');
   body.innerHTML = `
-    <div>
+    <div style="display:flex;flex-direction:column;height:100%">
       <div class="sim-search-wrap">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input class="sim-search-input" id="simSearchInput" placeholder="Type a game name…" oninput="onSimSearch(this.value)" autocomplete="off">
       </div>
       <div class="sim-results-list" id="simResultsList"></div>
       <div id="simSelectedWrap"></div>
-      <div id="simMatchesWrap"></div>
+      <div id="simMatchesWrap" style="margin-top:4px"></div>
     </div>`;
   simSelectedGame = null;
-  document.getElementById('simSearchInput').focus();
+  setTimeout(() => { const el = document.getElementById('simSearchInput'); if(el) el.focus(); }, 50);
 }
 
 function onSimSearch(q) {
@@ -1228,12 +1231,15 @@ function onSimSearch(q) {
 function selectSimGame(idx) {
   const r = DATA[idx];
   simSelectedGame = r;
+
+  // Clear search
   document.getElementById('simResultsList').innerHTML = '';
   document.getElementById('simSearchInput').value = '';
 
+  // Show selected game
   document.getElementById('simSelectedWrap').innerHTML = `
     <div class="sim-selected-game">
-      <div>
+      <div style="flex:1;min-width:0">
         <div class="sim-selected-name">${r[2]}</div>
         <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">
           <span class="badge ${badgeClass(r[0])}">${r[0]}</span>
@@ -1241,40 +1247,70 @@ function selectSimGame(idx) {
           ${r[7] ? `<span style="font-size:.72rem;color:var(--text3)">· ${r[7]}</span>` : ''}
         </div>
       </div>
-      <button class="sim-selected-clear" onclick="clearSimSelected()" title="Clear">✕</button>
+      <button class="sim-selected-clear" onclick="clearSimSelected()">✕</button>
     </div>`;
 
-  // Compute & show matches
-  const matches = getMatches(r, 8);
+  // Build matches manually — no helper function, fully inline
+  const source = r;
+  const srcFeats = (source[6]||'').toLowerCase().split(',').map(f=>f.trim()).filter(f=>f&&f!=='n/a');
+  const srcThemeWords = (source[7]||'').toLowerCase().split(/[\s\/,&\-]+/).filter(w=>w.length>2);
+
+  const scored = [];
+  for (let i = 0; i < DATA.length; i++) {
+    const d = DATA[i];
+    if (d[2] === source[2] && d[0] === source[0]) continue; // skip exact same
+    let sc = 0;
+    const dFeats = (d[6]||'').toLowerCase().split(',').map(f=>f.trim()).filter(f=>f&&f!=='n/a');
+    const dThemeWords = (d[7]||'').toLowerCase().split(/[\s\/,&\-]+/).filter(w=>w.length>2);
+    // features
+    for (const f of srcFeats) { if (dFeats.includes(f)) sc += 14; }
+    sc = Math.min(sc, 50) + (sc > 50 ? 0 : 0); // cap
+    // theme
+    let tsc = 0;
+    for (const w of srcThemeWords) { if (dThemeWords.includes(w)) tsc += 18; }
+    sc += Math.min(tsc, 40);
+    // category
+    if (d[1] === source[1]) sc += 10;
+    // casino
+    if (d[0] === source[0]) sc += 5;
+    if (sc >= 5) scored.push({ d, sc, i });
+  }
+  scored.sort((a,b) => b.sc - a.sc);
+  const top = scored.slice(0, 8);
+
   const wrap = document.getElementById('simMatchesWrap');
-  if (!matches.length) {
-    wrap.innerHTML = `<div style="text-align:center;color:var(--text3);font-size:.82rem;padding:16px 0">No close matches found.</div>`;
+  if (!top.length) {
+    wrap.innerHTML = `<p style="color:var(--text3);font-size:.82rem;text-align:center;padding:20px 0">No matches found.</p>`;
     return;
   }
-  wrap.innerHTML = `
-    <div class="sim-matches-label">🎯 Best matches — ${matches.length} games</div>
-    ${matches.map(({r: d, score}) => {
-      const pct = Math.min(Math.round(score / 105 * 100), 100);
-      const barColor = pct >= 70 ? 'var(--p500)' : pct >= 40 ? 'var(--p400)' : 'var(--border2)';
-      const srcF = (r[6]||'').split(',').map(f=>f.trim().toLowerCase());
-      const sharedF = (d[6]||'').split(',').map(f=>f.trim()).filter(f=>srcF.includes(f.toLowerCase()));
-      const sharedFhtml = sharedF.slice(0,3).map(f=>`<span class="match-tag">${f}</span>`).join('');
-      return `<div class="rec-card" onclick="closeQuiz(); openPanel(${JSON.stringify(d).replace(/</g,'\\u003c')})">
-        <div class="rec-card-left">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px">
-            <div class="rec-card-name">${d[2]}</div>
-            <span class="rec-card-score">${pct}%</span>
-          </div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:5px">
-            <span class="badge ${badgeClass(d[0])}" style="font-size:.62rem">${d[0]}</span>
-            <span class="chip" style="font-size:.65rem">${d[1]}</span>
-            ${d[7] ? `<span style="font-size:.7rem;color:var(--text3)">· ${d[7]}</span>` : ''}
-          </div>
-          ${sharedFhtml ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">${sharedFhtml}</div>` : ''}
-          <div class="match-bar-wrap"><div class="match-bar" style="width:${pct}%;background:${barColor}"></div></div>
+
+  let html = `<div class="sim-matches-label" style="margin-bottom:10px">🎯 ${top.length} matches found</div>`;
+  for (const { d, sc } of top) {
+    const pct = Math.min(Math.round(sc / 105 * 100), 100);
+    const bar = pct >= 70 ? 'var(--p500)' : pct >= 40 ? 'var(--p400)' : 'var(--border2)';
+    const srcFL = srcFeats;
+    const shared = (d[6]||'').split(',').map(f=>f.trim()).filter(f=>srcFL.includes(f.toLowerCase())).slice(0,3);
+    const tags = shared.map(f=>`<span class="match-tag">${f}</span>`).join('');
+    html += `
+    <div class="rec-card" style="cursor:pointer;margin-bottom:8px" onclick="closeQuiz();openPanel(DATA[${DATA.indexOf(d)}])">
+      <div class="rec-card-left">
+        <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:4px">
+          <div class="rec-card-name">${d[2]}</div>
+          <span class="rec-card-score">${pct}%</span>
         </div>
-      </div>`;
-    }).join('')}`;
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px">
+          <span class="badge ${badgeClass(d[0])}" style="font-size:.62rem">${d[0]}</span>
+          <span class="chip" style="font-size:.65rem">${d[1]}</span>
+          ${d[7] ? `<span style="font-size:.7rem;color:var(--text3)">· ${d[7]}</span>` : ''}
+        </div>
+        ${tags ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px">${tags}</div>` : ''}
+        <div style="height:3px;background:var(--surface);border-radius:999px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${bar};border-radius:999px"></div>
+        </div>
+      </div>
+    </div>`;
+  }
+  wrap.innerHTML = html;
 }
 
 function clearSimSelected() {
