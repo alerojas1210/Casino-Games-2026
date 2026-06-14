@@ -513,6 +513,31 @@ body.dark .similar-card { background: #16161F; border-color: var(--border); }
 body.dark .similar-card:hover { background: var(--p50); border-color: var(--p400); }
 body.dark .side-panel { background: #111118; }
 
+/* ── MATCH UI ── */
+.match-score {
+  font-size: 0.7rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px;
+  background: var(--p100); color: var(--p700);
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap; flex-shrink: 0;
+}
+.match-tag {
+  font-size: 0.65rem; font-weight: 600;
+  padding: 2px 7px; border-radius: 999px;
+  background: var(--p200); color: var(--p700);
+  display: inline-block;
+}
+.match-bar-wrap {
+  height: 3px; background: var(--surface);
+  border-radius: 999px; overflow: hidden; margin-top: 2px;
+}
+.match-bar {
+  height: 100%; border-radius: 999px;
+  transition: width .4s ease;
+}
+body.dark .match-score { background: var(--p100); color: #C084FC; }
+body.dark .match-tag   { background: var(--p200); color: #C084FC; }
+
 /* ── HOT GAMES / QUIZ ── */
 .quiz-fab {
   position: fixed; bottom: 28px; right: 24px; z-index: 150;
@@ -538,6 +563,8 @@ body.dark .side-panel { background: #111118; }
 .quiz-modal {
   background: var(--white); border-radius: 20px;
   width: min(520px, 94vw);
+  max-height: 90vh;
+  display: flex; flex-direction: column;
   box-shadow: 0 24px 80px rgba(30,0,69,.35);
   transform: scale(.94) translateY(16px);
   transition: transform .3s cubic-bezier(.34,1.4,.64,1);
@@ -547,6 +574,7 @@ body.dark .side-panel { background: #111118; }
 .quiz-modal-header {
   background: linear-gradient(135deg, var(--p900) 0%, #4c0099 100%);
   padding: 24px 28px 20px; position: relative; overflow: hidden;
+  flex-shrink: 0;
 }
 .quiz-modal-header::before {
   content: "♠ ♥ ♣ ♦";
@@ -562,7 +590,7 @@ body.dark .side-panel { background: #111118; }
 }
 .quiz-progress-dot.done { background: #C084FC; }
 .quiz-progress-dot.active { background: #FFFFFF; }
-.quiz-body { padding: 24px 28px 28px; }
+.quiz-body { padding: 24px 28px 28px; overflow-y: auto; flex: 1; }
 .quiz-question { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 16px; line-height: 1.4; }
 .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
 .quiz-option {
@@ -612,6 +640,70 @@ body.dark .quiz-option { background: #1A1A26; border-color: var(--border); }
 body.dark .quiz-option:hover { background: var(--p50); }
 body.dark .quiz-option.selected { background: var(--p100); border-color: var(--p400); }
 body.dark .rec-card { background: #16161F; border-color: var(--border); }
+
+/* ── QUIZ TABS ── */
+.quiz-tabs {
+  display: flex; gap: 6px; margin-top: 16px;
+}
+.quiz-tab {
+  flex: 1; padding: 8px 12px; border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,.15);
+  background: transparent; color: rgba(255,255,255,.55);
+  font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  font-family: 'Aeonik','Plus Jakarta Sans',sans-serif;
+  transition: all .2s; letter-spacing: .01em;
+}
+.quiz-tab:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.8); }
+.quiz-tab.active { background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.35); }
+
+/* ── FIND SIMILAR SEARCH ── */
+.sim-search-wrap {
+  position: relative; margin-bottom: 12px;
+}
+.sim-search-wrap svg {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%); color: var(--text3); pointer-events: none;
+}
+.sim-search-input {
+  width: 100%; padding: 10px 12px 10px 38px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  background: var(--off); color: var(--text);
+  font-size: 0.84rem; font-family: 'Aeonik','Plus Jakarta Sans',sans-serif;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.sim-search-input:focus { border-color: var(--p500); box-shadow: 0 0 0 3px rgba(139,43,226,.12); }
+.sim-search-input::placeholder { color: var(--text3); }
+.sim-results-list {
+  max-height: 220px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--white); margin-bottom: 14px;
+  scrollbar-width: thin; scrollbar-color: var(--p200) transparent;
+}
+.sim-results-list:empty { display: none; }
+.sim-result-item {
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--surface);
+  transition: background .12s; display: flex; align-items: center; gap: 10px;
+}
+.sim-result-item:last-child { border-bottom: none; }
+.sim-result-item:hover { background: var(--p50); }
+.sim-result-name { font-weight: 600; font-size: 0.84rem; color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sim-selected-game {
+  padding: 12px 14px; border-radius: 10px;
+  border: 2px solid var(--p500); background: var(--p50);
+  margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+}
+.sim-selected-name { font-weight: 700; font-size: 0.9rem; color: var(--p700); flex: 1; }
+.sim-selected-clear { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 1rem; padding: 0; }
+.sim-selected-clear:hover { color: var(--p700); }
+.sim-matches-label {
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--text3); font-family: 'DM Mono',monospace; font-weight: 600;
+  margin-bottom: 10px;
+}
+body.dark .sim-search-input { background: #1A1A26; border-color: var(--border); color: var(--text); }
+body.dark .sim-results-list { background: #1A1A26; border-color: var(--border); }
+body.dark .sim-result-item:hover { background: var(--p50); }
+body.dark .sim-selected-game { background: var(--p50); border-color: var(--p500); }
 </style>
 </head>
 <body>
@@ -693,12 +785,11 @@ body.dark .rec-card { background: #16161F; border-color: var(--border); }
 <div class="quiz-overlay" id="quizOverlay">
   <div class="quiz-modal" id="quizModal">
     <div class="quiz-modal-header">
-      <div class="quiz-modal-title">🎯 Find Your Perfect Game</div>
-      <div class="quiz-modal-sub">Answer 3 quick questions</div>
-      <div class="quiz-progress" id="quizProgress">
-        <div class="quiz-progress-dot active"></div>
-        <div class="quiz-progress-dot"></div>
-        <div class="quiz-progress-dot"></div>
+      <div class="quiz-modal-title">🎰 Game Finder</div>
+      <div class="quiz-modal-sub">Discover your next favorite game</div>
+      <div class="quiz-tabs">
+        <button class="quiz-tab active" id="tabQuiz" onclick="switchTab('quiz')">🎯 Game Quiz</button>
+        <button class="quiz-tab" id="tabSimilar" onclick="switchTab('similar')">🔍 Find Similar</button>
       </div>
     </div>
     <div class="quiz-body" id="quizBody"></div>
@@ -929,6 +1020,42 @@ document.getElementById('categoryFilter').addEventListener('change', function() 
 document.getElementById('featureFilter').addEventListener('change', function() { applyFilters(this); });
 document.getElementById('themeFilter').addEventListener('change', function() { applyFilters(this); });
 
+// ── SMART MATCH ENGINE ──
+function scoreMatch(source, candidate) {
+  if (candidate[2] === source[2]) return -1; // exact same game, skip
+
+  let score = 0;
+
+  // 1. Feature overlap (up to 50 pts)
+  const srcFeats = (source[6]||'').split(',').map(f=>f.trim().toLowerCase()).filter(Boolean);
+  const canFeats = (candidate[6]||'').split(',').map(f=>f.trim().toLowerCase()).filter(Boolean);
+  const sharedFeats = srcFeats.filter(f => canFeats.includes(f));
+  score += Math.min(sharedFeats.length * 14, 50);
+
+  // 2. Theme keyword overlap (up to 40 pts)
+  const themeWords = s => (s||'').toLowerCase().split(/[\s\/,&\-]+/).filter(w=>w.length>2);
+  const srcTheme = themeWords(source[7]);
+  const canTheme = themeWords(candidate[7]);
+  const sharedTheme = srcTheme.filter(w => canTheme.includes(w));
+  score += Math.min(sharedTheme.length * 18, 40);
+
+  // 3. Same category (10 pts)
+  if (candidate[1] === source[1]) score += 10;
+
+  // 4. Same casino (5 pts)
+  if (candidate[0] === source[0]) score += 5;
+
+  return score;
+}
+
+function getMatches(r, limit = 8) {
+  return DATA
+    .map(d => ({ d, score: scoreMatch(r, d) }))
+    .filter(x => x.score >= 5) // at least same casino OR same category
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
 // ── SIMILAR GAMES PANEL ──
 function openPanel(r) {
   document.getElementById('panelTitle').textContent = r[2];
@@ -937,40 +1064,67 @@ function openPanel(r) {
   const panel   = document.getElementById('sidePanel');
   const body    = document.getElementById('panelBody');
 
-  // Game info
-  const infoRows = [
-    ['Casino', `<span class="badge ${badgeClass(r[0])}">${r[0]}</span>`],
-    ['Category', `<span class="chip">${r[1]}</span>`],
-    ['Min Bet', r[3]], ['Max Bet', r[4]],
-    ['Paylines', r[5]==='N/A'?'—':r[5]],
-    ['Features', r[6]||'—'],
-    ['Theme', r[7]||'—'],
-  ];
-  let html = '<div class="panel-section"><div class="panel-section-label">Game Info</div><div class="panel-game-info">'
-    + infoRows.map(([l,v]) => `<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>`).join('')
-    + '</div></div>';
+  // 1. Game info card
+  const srcFeats = (r[6]||'').split(',').map(f=>f.trim()).filter(Boolean);
+  const featTags = srcFeats.length
+    ? srcFeats.map(f => `<span class="chip" style="margin:2px">${f}</span>`).join(' ')
+    : '—';
 
-  // Similar by theme
-  const sameTheme = DATA.filter(d => d[7]===r[7] && d[2]!==r[2]).slice(0, 5);
-  if (sameTheme.length) {
-    html += '<div class="panel-section"><div class="panel-section-label">Same Theme — ' + (r[7]||'') + '</div>'
-      + sameTheme.map(d => `<div class="similar-card" onclick="openPanel(${JSON.stringify(d).replace(/</g,'\u003c')})">
-          <div class="similar-card-name">${d[2]}</div>
-          <div class="similar-card-meta">
-            <span class="badge ${badgeClass(d[0])}">${d[0]}</span>
-            <span class="chip">${d[1]}</span>
-          </div>
-        </div>`).join('') + '</div>';
-  }
+  let html = `
+  <div class="panel-section">
+    <div class="panel-section-label">Game Info</div>
+    <div class="panel-game-info">
+      <div class="info-row"><span class="info-label">Casino</span><span class="info-val"><span class="badge ${badgeClass(r[0])}">${r[0]}</span></span></div>
+      <div class="info-row"><span class="info-label">Category</span><span class="info-val"><span class="chip">${r[1]}</span></span></div>
+      <div class="info-row"><span class="info-label">Min Bet</span><span class="info-val">${r[3]||'—'}</span></div>
+      <div class="info-row"><span class="info-label">Max Bet</span><span class="info-val">${r[4]||'—'}</span></div>
+      <div class="info-row"><span class="info-label">Paylines</span><span class="info-val">${(!r[5]||r[5]==='N/A')?'—':r[5]}</span></div>
+      <div class="info-row"><span class="info-label">Theme</span><span class="info-val">${r[7]||'—'}</span></div>
+    </div>
+    <div style="margin-top:8px">
+      <div class="panel-section-label" style="margin-bottom:6px">Features</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${featTags}</div>
+    </div>
+  </div>`;
 
-  // Similar by casino
-  const sameCasino = DATA.filter(d => d[0]===r[0] && d[1]===r[1] && d[2]!==r[2]).slice(0, 5);
-  if (sameCasino.length) {
-    html += '<div class="panel-section"><div class="panel-section-label">More from ' + r[0] + ' · ' + r[1] + '</div>'
-      + sameCasino.map(d => `<div class="similar-card" onclick="openPanel(${JSON.stringify(d).replace(/</g,'\u003c')})">
+  // 2. Smart matches
+  const matches = getMatches(r, 8);
+  if (matches.length) {
+    html += `<div class="panel-section">
+      <div class="panel-section-label" style="display:flex;justify-content:space-between;align-items:center">
+        <span>🎯 You might also like</span>
+        <span style="color:var(--text3);font-size:.65rem;letter-spacing:.04em">${matches.length} matches</span>
+      </div>`;
+
+    matches.forEach(({ d, score }) => {
+      // Show which features are shared
+      const srcF = (r[6]||'').split(',').map(f=>f.trim().toLowerCase());
+      const sharedF = (d[6]||'').split(',').map(f=>f.trim()).filter(f=>srcF.includes(f.toLowerCase()));
+      const sharedFhtml = sharedF.slice(0,3).map(f=>`<span class="match-tag">${f}</span>`).join('');
+
+      // Score bar color
+      const pct = Math.min(Math.round(score / 105 * 100), 100);
+      const barColor = pct >= 70 ? 'var(--p500)' : pct >= 40 ? 'var(--p400)' : 'var(--border2)';
+
+      html += `<div class="similar-card" onclick="openPanel(${JSON.stringify(d).replace(/</g,'\\u003c')})">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
           <div class="similar-card-name">${d[2]}</div>
-          <div class="similar-card-meta"><span class="chip">${d[7]||'—'}</span></div>
-        </div>`).join('') + '</div>';
+          <span class="match-score">${pct}%</span>
+        </div>
+        <div class="similar-card-meta" style="margin-bottom:6px">
+          <span class="badge ${badgeClass(d[0])}">${d[0]}</span>
+          <span class="chip">${d[1]}</span>
+          ${d[7] ? `<span style="color:var(--text3);font-size:.7rem">· ${d[7]}</span>` : ''}
+        </div>
+        ${sharedFhtml ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">${sharedFhtml}</div>` : ''}
+        <div class="match-bar-wrap">
+          <div class="match-bar" style="width:${pct}%;background:${barColor}"></div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  } else {
+    html += `<div class="panel-section"><div style="color:var(--text3);font-size:.82rem;text-align:center;padding:20px 0">No close matches found for this game.</div></div>`;
   }
 
   body.innerHTML = html;
@@ -1016,32 +1170,147 @@ const QUESTIONS = [
   }
 ];
 
+let activeTab = 'quiz';
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabQuiz').classList.toggle('active', tab==='quiz');
+  document.getElementById('tabSimilar').classList.toggle('active', tab==='similar');
+  if (tab === 'quiz') {
+    quizStep = 0; quizAnswers = [];
+    renderQuizStep();
+  } else {
+    renderSimilarTab();
+  }
+}
+
+// ── FIND SIMILAR TAB ──
+let simSelectedGame = null;
+
+function renderSimilarTab() {
+  const body = document.getElementById('quizBody');
+  body.innerHTML = `
+    <div>
+      <div class="sim-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="sim-search-input" id="simSearchInput" placeholder="Type a game name…" oninput="onSimSearch(this.value)" autocomplete="off">
+      </div>
+      <div class="sim-results-list" id="simResultsList"></div>
+      <div id="simSelectedWrap"></div>
+      <div id="simMatchesWrap"></div>
+    </div>`;
+  simSelectedGame = null;
+  document.getElementById('simSearchInput').focus();
+}
+
+function onSimSearch(q) {
+  const list = document.getElementById('simResultsList');
+  if (!q.trim()) { list.innerHTML = ''; return; }
+  const ql = q.toLowerCase();
+  const hits = [];
+  for (let i = 0; i < DATA.length; i++) {
+    if (DATA[i][2].toLowerCase().includes(ql)) { hits.push(i); if (hits.length >= 12) break; }
+  }
+  if (!hits.length) {
+    list.innerHTML = `<div class="sim-result-item"><span class="sim-result-name" style="color:var(--text3)">No games found</span></div>`;
+    return;
+  }
+  list.innerHTML = hits.map(idx => {
+    const r = DATA[idx];
+    return `<div class="sim-result-item" onclick="selectSimGame(${idx})">
+      <span class="sim-result-name">${r[2]}</span>
+      <span class="badge ${badgeClass(r[0])}" style="font-size:.6rem">${r[0]}</span>
+      <span class="chip" style="font-size:.65rem">${r[1]}</span>
+    </div>`;
+  }).join('');
+}
+
+function selectSimGame(idx) {
+  const r = DATA[idx];
+  simSelectedGame = r;
+  document.getElementById('simResultsList').innerHTML = '';
+  document.getElementById('simSearchInput').value = '';
+
+  document.getElementById('simSelectedWrap').innerHTML = `
+    <div class="sim-selected-game">
+      <div>
+        <div class="sim-selected-name">${r[2]}</div>
+        <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">
+          <span class="badge ${badgeClass(r[0])}">${r[0]}</span>
+          <span class="chip">${r[1]}</span>
+          ${r[7] ? `<span style="font-size:.72rem;color:var(--text3)">· ${r[7]}</span>` : ''}
+        </div>
+      </div>
+      <button class="sim-selected-clear" onclick="clearSimSelected()" title="Clear">✕</button>
+    </div>`;
+
+  // Compute & show matches
+  const matches = getMatches(r, 8);
+  const wrap = document.getElementById('simMatchesWrap');
+  if (!matches.length) {
+    wrap.innerHTML = `<div style="text-align:center;color:var(--text3);font-size:.82rem;padding:16px 0">No close matches found.</div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="sim-matches-label">🎯 Best matches — ${matches.length} games</div>
+    ${matches.map(({r: d, score}) => {
+      const pct = Math.min(Math.round(score / 105 * 100), 100);
+      const barColor = pct >= 70 ? 'var(--p500)' : pct >= 40 ? 'var(--p400)' : 'var(--border2)';
+      const srcF = (r[6]||'').split(',').map(f=>f.trim().toLowerCase());
+      const sharedF = (d[6]||'').split(',').map(f=>f.trim()).filter(f=>srcF.includes(f.toLowerCase()));
+      const sharedFhtml = sharedF.slice(0,3).map(f=>`<span class="match-tag">${f}</span>`).join('');
+      return `<div class="rec-card" onclick="closeQuiz(); openPanel(${JSON.stringify(d).replace(/</g,'\\u003c')})">
+        <div class="rec-card-left">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px">
+            <div class="rec-card-name">${d[2]}</div>
+            <span class="rec-card-score">${pct}%</span>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:5px">
+            <span class="badge ${badgeClass(d[0])}" style="font-size:.62rem">${d[0]}</span>
+            <span class="chip" style="font-size:.65rem">${d[1]}</span>
+            ${d[7] ? `<span style="font-size:.7rem;color:var(--text3)">· ${d[7]}</span>` : ''}
+          </div>
+          ${sharedFhtml ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">${sharedFhtml}</div>` : ''}
+          <div class="match-bar-wrap"><div class="match-bar" style="width:${pct}%;background:${barColor}"></div></div>
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+function clearSimSelected() {
+  simSelectedGame = null;
+  document.getElementById('simSelectedWrap').innerHTML = '';
+  document.getElementById('simMatchesWrap').innerHTML = '';
+  document.getElementById('simSearchInput').focus();
+}
+
 let quizAnswers = [];
 let quizStep = 0;
 
 function openQuiz() {
-  quizAnswers = [];
-  quizStep = 0;
+  activeTab = 'quiz';
+  quizAnswers = []; quizStep = 0;
+  document.getElementById('tabQuiz').classList.add('active');
+  document.getElementById('tabSimilar').classList.remove('active');
   document.getElementById('quizOverlay').classList.add('open');
   renderQuizStep();
 }
 
 function renderQuizStep() {
-  const prog = document.getElementById('quizProgress');
-  prog.querySelectorAll('.quiz-progress-dot').forEach((d,i) => {
-    d.className = 'quiz-progress-dot' + (i < quizStep ? ' done' : i === quizStep ? ' active' : '');
-  });
-
   const q = QUESTIONS[quizStep];
+  const dots = QUESTIONS.map((_,i) =>
+    `<div class="quiz-progress-dot${i < quizStep ? ' done' : i === quizStep ? ' active' : ''}"></div>`
+  ).join('');
   const body = document.getElementById('quizBody');
   body.innerHTML = `
+    <div class="quiz-progress" style="margin-bottom:16px">${dots}</div>
     <div class="quiz-question">${q.q}</div>
     <div class="quiz-options">
-      ${q.opts.map((o,i) => `<button class="quiz-option" onclick="selectQuizOpt(this, ${i})">${o.label}</button>`).join('')}
+      ${q.opts.map((o,i) => `<button class="quiz-option${quizAnswers[quizStep]===i?' selected':''}" onclick="selectQuizOpt(this,${i})">${o.label}</button>`).join('')}
     </div>
     <div class="quiz-actions">
       <button class="quiz-btn quiz-btn-secondary" onclick="closeQuiz()">Cancel</button>
-      <button class="quiz-btn quiz-btn-primary" id="quizNext" onclick="nextQuizStep()" disabled>
+      <button class="quiz-btn quiz-btn-primary" id="quizNext" onclick="nextQuizStep()" ${quizAnswers[quizStep]===undefined?'disabled':''}>
         ${quizStep < QUESTIONS.length - 1 ? 'Next →' : 'Find Games ✨'}
       </button>
     </div>`;
