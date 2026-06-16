@@ -831,7 +831,11 @@ const PAGE_SIZE = 75;
   const casinos  = [...new Set(DATA.map(r=>r[0]))].sort();
   const cats     = [...new Set(DATA.map(r=>r[1]))].sort();
   const featSet  = new Set();
-  DATA.forEach(r => { if (r[6] && r[6]!=='N/A') r[6].split(',').forEach(f => { const t=f.trim(); if(t) featSet.add(t); }); });
+  DATA.forEach(r => {
+    if (!r[6] || r[6]==='N/A') return;
+    // Split by ", " (comma+space) only — avoids breaking "$100,000.00"
+    r[6].split(/,\s+(?!\d)/).map(f=>f.trim()).filter(Boolean).forEach(f => featSet.add(f));
+  });
   const features = [...featSet].sort();
   const themeSet = new Set();
   DATA.forEach(r => { if (r[7]&&r[7].trim()) themeSet.add(r[7].trim()); });
@@ -906,7 +910,7 @@ function applyFilters(sourceEl) {
   filtered = DATA.filter(r => {
     if (casino && r[0]!==casino) return false;
     if (cat    && r[1]!==cat)    return false;
-    if (feat   && !(r[6]||'').split(',').map(f=>f.trim()).includes(feat)) return false;
+    if (feat   && !(r[6]||'').split(/,\s+(?!\d)/).map(f=>f.trim()).includes(feat)) return false;
     if (theme  && (r[7]||'').trim()!==theme) return false;
     if (q) { const h=(r[2]+' '+r[6]+' '+r[7]+' '+r[1]+' '+r[0]).toLowerCase(); if(!h.includes(q)) return false; }
     return true;
@@ -1377,30 +1381,30 @@ function showQuizResults() {
   // Score every game
   const scored = DATA.map(r => {
     let score = 0;
-    // Category match
     if (catAns.tags.some(t => r[1].toLowerCase().includes(t.toLowerCase()))) score += 40;
-    // Theme match (check if any theme keyword is in r[7])
     if (themeAns.tags && themeAns.tags.some(t => (r[7]||'').toLowerCase().includes(t.toLowerCase()))) score += 35;
-    // Bet range match
     const minBet = parseFloat((r[3]||'').replace(/[$,]/g,'')) || 0;
     if (minBet >= betAns.min && minBet < betAns.max) score += 25;
-    else if (betAns.max === Infinity) score += 10; // "any budget" still gets points
+    else if (betAns.max === Infinity) score += 10;
     return { r, score };
   });
 
   scored.sort((a,b) => b.score - a.score);
   const top = scored.filter(x => x.score > 0).slice(0, 5);
 
-  const prog = document.getElementById('quizProgress');
-  prog.querySelectorAll('.quiz-progress-dot').forEach(d => d.className = 'quiz-progress-dot done');
+  // Progress dots all done — inline in body now
+  const allDots = `<div class="quiz-progress" style="margin-bottom:16px">
+    ${QUESTIONS.map(()=>'<div class="quiz-progress-dot done"></div>').join('')}
+  </div>`;
 
   const body = document.getElementById('quizBody');
-  body.innerHTML = `
+  body.innerHTML = allDots + `
     <div class="quiz-results">
       <div class="quiz-results-title">🎯 Your Top Picks</div>
       <div class="quiz-results-sub">${top.length} games matched your profile</div>
-      ${top.map(({r, score}) => `
-        <div class="rec-card" onclick="closeQuiz(); openPanel(${JSON.stringify(r).replace(/</g,'\u003c')})">
+      ${top.map(({r, score}) => {
+        const idx = DATA.indexOf(r);
+        return `<div class="rec-card" onclick="closeQuiz();openPanel(DATA[${idx}])">
           <div class="rec-card-left">
             <div class="rec-card-name">${r[2]}</div>
             <div class="rec-card-meta">
@@ -1408,8 +1412,9 @@ function showQuizResults() {
               &nbsp;${r[1]} &nbsp;·&nbsp; ${r[7]||'—'}
             </div>
           </div>
-          <span class="rec-card-score">${score}% match</span>
-        </div>`).join('')}
+          <span class="rec-card-score">${score}%</span>
+        </div>`;
+      }).join('')}
       <div class="quiz-actions" style="margin-top:16px">
         <button class="quiz-btn quiz-btn-secondary" onclick="quizStep=0;quizAnswers=[];renderQuizStep()">↺ Retry</button>
         <button class="quiz-btn quiz-btn-primary" onclick="closeQuiz()">Done ✓</button>
